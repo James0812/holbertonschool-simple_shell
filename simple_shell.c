@@ -4,33 +4,8 @@
 #include <string.h>
 #include <sys/wait.h>
 
+/* Declare the external environment */
 extern char **environ;
-
-/**
- * trim - Removes leading and trailing spaces from a string
- * @str: String to process
- *
- * Return: Pointer to the trimmed string
- */
-char *trim(char *str)
-{
-    char *end;
-
-    /* Trim leading spaces */
-    while (*str == ' ' || *str == '\t')
-        str++;
-
-    if (*str == 0) /* empty string */
-        return str;
-
-    /* Trim trailing spaces */
-    end = str + strlen(str) - 1;
-    while (end > str && (*end == ' ' || *end == '\t'))
-        end--;
-
-    *(end + 1) = '\0';
-    return str;
-}
 
 /**
  * main - Simple UNIX command interpreter
@@ -44,36 +19,41 @@ int main(void)
     ssize_t nread;
     pid_t pid;
     int status;
-    char *args[2];
 
     while (1)
     {
-        /* Display prompt only in interactive mode */
+        /* Print prompt only if input is interactive */
         if (isatty(STDIN_FILENO))
-            write(STDOUT_FILENO, "($) ", 4);
+            printf("($) "), fflush(stdout);
 
-        /* Read command line */
+        /* Read input line */
         nread = getline(&line, &len, stdin);
-        if (nread == -1) /* EOF (Ctrl+D) */
+        if (nread == -1) /* Ctrl+D */
         {
-            if (isatty(STDIN_FILENO))
-                write(STDOUT_FILENO, "\n", 1);
+            printf("\n");
             free(line);
             exit(EXIT_SUCCESS);
         }
 
-        /* Remove newline */
+        /* Remove newline at the end */
         if (line[nread - 1] == '\n')
             line[nread - 1] = '\0';
 
-        /* Trim spaces */
-        args[0] = trim(line);
-        args[1] = NULL;
-
-        if (args[0][0] == '\0') /* empty line */
+        /* Ignore empty lines */
+        if (line[0] == '\0')
             continue;
 
-        /* Fork child process */
+        /* Split the line into tokens: command + arguments */
+        char *tokens[100];
+        int i = 0;
+        tokens[i] = strtok(line, " \t");
+        while (tokens[i] != NULL && i < 99)
+        {
+            i++;
+            tokens[i] = strtok(NULL, " \t");
+        }
+
+        /* Fork a child process */
         pid = fork();
         if (pid == -1)
         {
@@ -81,24 +61,23 @@ int main(void)
             free(line);
             exit(EXIT_FAILURE);
         }
-
-        if (pid == 0)
+        else if (pid == 0)
         {
             /* Child executes the command */
-            if (execve(args[0], args, environ) == -1)
+            if (execve(tokens[0], tokens, environ) == -1)
             {
-                perror(args[0]);
+                perror(tokens[0]);
                 exit(EXIT_FAILURE);
             }
         }
         else
         {
-            /* Parent waits for child to finish */
+            /* Parent waits for the child to finish */
             waitpid(pid, &status, 0);
         }
     }
 
     free(line);
-    return (0);
+    return 0;
 }
 
