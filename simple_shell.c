@@ -4,7 +4,6 @@
 #include <string.h>
 #include <sys/wait.h>
 
-/* Declare the external environment */
 extern char **environ;
 
 /**
@@ -22,6 +21,9 @@ int main(void)
 
     while (1)
     {
+        char *tokens[100];
+        int i;
+
         /* Print prompt only if input is interactive */
         if (isatty(STDIN_FILENO))
             printf("($) "), fflush(stdout);
@@ -43,9 +45,8 @@ int main(void)
         if (line[0] == '\0')
             continue;
 
-        /* Split the line into tokens: command + arguments */
-        char *tokens[100];
-        int i = 0;
+        /* Split the line into tokens (space/tab separated) */
+        i = 0;
         tokens[i] = strtok(line, " \t");
         while (tokens[i] != NULL && i < 99)
         {
@@ -78,6 +79,6 @@ int main(void)
     }
 
     free(line);
-    return 0;
+    return (0);
 }
 
