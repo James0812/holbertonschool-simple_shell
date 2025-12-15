@@ -13,54 +13,62 @@ extern char **environ;
  */
 int main(void)
 {
-    char *line = NULL;
-    char *args[2];
-    size_t len = 0;
-    ssize_t nread;
-    pid_t pid;
-    int status;
+	char *line = NULL;
+	size_t len = 0;
+	ssize_t nread;
+	pid_t pid;
+	int status;
+	char *args[2];
 
-    while (1)
-    {
-        if (isatty(STDIN_FILENO))
-            printf("($) ");
+	while (1)
+	{
+		/* Display prompt only in interactive mode */
+		if (isatty(STDIN_FILENO))
+			write(STDOUT_FILENO, "($) ", 4);
 
-        nread = getline(&line, &len, stdin);
-        if (nread == -1)
-        {
-            printf("\n");
-            free(line);
-            exit(EXIT_SUCCESS);
-        }
+		/* Read input */
+		nread = getline(&line, &len, stdin);
+		if (nread == -1) /* EOF (Ctrl+D) */
+		{
+			if (isatty(STDIN_FILENO))
+				write(STDOUT_FILENO, "\n", 1);
+			free(line);
+			exit(EXIT_SUCCESS);
+		}
 
-        if (line[nread - 1] == '\n')
-            line[nread - 1] = '\0';
+		/* Remove newline */
+		if (line[nread - 1] == '\n')
+			line[nread - 1] = '\0';
 
-        pid = fork();
-        if (pid == -1)
-        {
-            perror("fork");
-            free(line);
-            exit(EXIT_FAILURE);
-        }
-        else if (pid == 0)
-        {
-            args[0] = line;
-            args[1] = NULL;
+		/* Fork process */
+		pid = fork();
+		if (pid == -1)
+		{
+			perror("fork");
+			free(line);
+			exit(EXIT_FAILURE);
+		}
 
-            if (execve(line, args, environ) == -1)
-            {
-                perror(line);
-                exit(EXIT_FAILURE);
-            }
-        }
-        else
-        {
-            waitpid(pid, &status, 0);
-        }
-    }
+		if (pid == 0)
+		{
+			/* Child process */
+			args[0] = line;
+			args[1] = NULL;
 
-    free(line);
-    return (0);
+			if (execve(line, args, environ) == -1)
+			{
+				perror(line);
+				exit(EXIT_FAILURE);
+			}
+		}
+		else
+		{
+			/* Parent process */
+			waitpid(pid, &status, 0);
+		}
+	}
+
+	free(line);
+	return (0);
 }
 
