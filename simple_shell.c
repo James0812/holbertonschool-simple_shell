@@ -24,15 +24,16 @@ int main(void)
         char *tokens[100];
         int i;
 
-        /* Print prompt only if input is interactive */
+        /* Print prompt only if input is from terminal */
         if (isatty(STDIN_FILENO))
             printf("($) "), fflush(stdout);
 
         /* Read input line */
         nread = getline(&line, &len, stdin);
-        if (nread == -1) /* Ctrl+D */
+        if (nread == -1) /* Ctrl+D or EOF */
         {
-            printf("\n");
+            if (isatty(STDIN_FILENO))
+                printf("\n");
             free(line);
             exit(EXIT_SUCCESS);
         }
@@ -41,11 +42,11 @@ int main(void)
         if (line[nread - 1] == '\n')
             line[nread - 1] = '\0';
 
-        /* Ignore empty lines */
+        /* Skip empty lines */
         if (line[0] == '\0')
             continue;
 
-        /* Split the line into tokens (space/tab separated) */
+        /* Split the line into tokens */
         i = 0;
         tokens[i] = strtok(line, " \t");
         while (tokens[i] != NULL && i < 99)
@@ -54,7 +55,7 @@ int main(void)
             tokens[i] = strtok(NULL, " \t");
         }
 
-        /* Fork a child process */
+        /* Fork child process */
         pid = fork();
         if (pid == -1)
         {
@@ -64,7 +65,7 @@ int main(void)
         }
         else if (pid == 0)
         {
-            /* Child executes the command */
+            /* Child executes command */
             if (execve(tokens[0], tokens, environ) == -1)
             {
                 perror(tokens[0]);
@@ -73,7 +74,7 @@ int main(void)
         }
         else
         {
-            /* Parent waits for the child to finish */
+            /* Parent waits for child */
             waitpid(pid, &status, 0);
         }
     }
