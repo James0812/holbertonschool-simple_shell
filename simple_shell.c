@@ -42,9 +42,20 @@ int main(void)
         if (line[nread - 1] == '\n')
             line[nread - 1] = '\0';
 
-        /* Skip empty lines */
-        if (line[0] == '\0')
-            continue;
+        /* Skip empty lines or lines with only spaces/tabs */
+        {
+            int all_spaces = 1;
+            for (i = 0; line[i] != '\0'; i++)
+            {
+                if (line[i] != ' ' && line[i] != '\t')
+                {
+                    all_spaces = 0;
+                    break;
+                }
+            }
+            if (all_spaces)
+                continue;
+        }
 
         /* Split the line into tokens */
         i = 0;
