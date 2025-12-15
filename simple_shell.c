@@ -4,6 +4,8 @@
 #include <string.h>
 #include <sys/wait.h>
 
+extern char **environ;
+
 /**
  * main - Simple UNIX command interpreter
  *
