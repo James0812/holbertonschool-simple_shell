@@ -1,15 +1,81 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/wait.h>
 
 /**
- * main - prints the program name
- * @argc: number of command line arguments
- * @argv: array containing the arguments
+ * main - Entry point for the simple shell
  *
- * Return: Always 0 (Success)
+ * Return: 0 on success, or exit on failure
  */
-int main(int argc, char *argv[])
+int main(void)
 {
-	(void)argc; /* We don't use argc in this program */
-	printf("%s\n", argv[0]);
+	char *line = NULL;
+	size_t len = 0;
+	ssize_t nread;
+	pid_t pid;
+	int status;
+	char *args[64]; /* Array to store command and arguments */
+	int i;
+
+	while (1)
+	{
+		/* Print prompt */
+		if (isatty(STDIN_FILENO))
+			printf("($) ");
+
+		/* Read line from stdin */
+		nread = getline(&line, &len, stdin);
+		if (nread == -1)
+		{
+			free(line);
+			printf("\n");
+			exit(EXIT_SUCCESS);
+		}
+
+		/* Remove newline character */
+		if (line[nread - 1] == '\n')
+			line[nread - 1] = '\0';
+
+		/* Split line into arguments */
+		i = 0;
+		args[i] = strtok(line, " ");
+		while (args[i] != NULL)
+			args[++i] = strtok(NULL, " ");
+
+		/* Built-in command: exit */
+		if (args[0] != NULL && strcmp(args[0], "exit") == 0)
+		{
+			free(line);
+			exit(EXIT_SUCCESS);
+		}
+
+		/* Fork a child process */
+		pid = fork();
+		if (pid == -1)
+		{
+			perror("fork");
+			free(line);
+			exit(EXIT_FAILURE);
+		}
+		else if (pid == 0)
+		{
+			/* Child process executes the command */
+			if (execve(args[0], args, NULL) == -1)
+			{
+				perror(args[0]);
+				exit(EXIT_FAILURE);
+			}
+		}
+		else
+		{
+			/* Parent waits for child to finish */
+			waitpid(pid, &status, 0);
+		}
+	}
+
+	free(line);
 	return (0);
 }
+
