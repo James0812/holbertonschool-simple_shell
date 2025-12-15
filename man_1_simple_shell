@@ -1,0 +1,34 @@
+
+ File: `man_1_simple_shell`
+
+```man
+.TH HSH 18 "December 2025" "Holberton School" "Simple Shell Manual"
+.SH NAME
+hsh \- simple UNIX command interpreter
+
+.SH SYNOPSIS
+.B hsh
+
+.SH DESCRIPTION
+hsh is a simple UNIX command interpreter written in C.
+It executes commands entered by the user or read from standard input.
+
+.SH USAGE
+Interactive mode:
+.IP
+./hsh
+
+Non-interactive mode:
+.IP
+echo "/bin/ls" | ./hsh
+
+.SH BUILTINS
+.TP
+.B exit
+Exit the shell.
+
+.SH ENVIRONMENT
+The shell uses the PATH environment variable to locate executable files.
+
+.SH AUTHOR
+James and Maxime by Holberton School students.
