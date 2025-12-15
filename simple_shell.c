@@ -12,6 +12,7 @@
 int main(void)
 {
     char *line = NULL;
+    char *args[2];
     size_t len = 0;
     ssize_t nread;
     pid_t pid;
@@ -19,24 +20,20 @@ int main(void)
 
     while (1)
     {
-        /* Print prompt */
         if (isatty(STDIN_FILENO))
             printf("($) ");
 
-        /* Read input line */
         nread = getline(&line, &len, stdin);
-        if (nread == -1) /* Ctrl+D */
+        if (nread == -1)
         {
             printf("\n");
             free(line);
             exit(EXIT_SUCCESS);
         }
 
-        /* Remove newline */
         if (line[nread - 1] == '\n')
             line[nread - 1] = '\0';
 
-        /* Fork a child process */
         pid = fork();
         if (pid == -1)
         {
@@ -46,9 +43,10 @@ int main(void)
         }
         else if (pid == 0)
         {
-            /* Child executes the command */
-            char *args[] = {line, NULL};
-            if (execve(line, args, NULL) == -1)
+            args[0] = line;
+            args[1] = NULL;
+
+            if (execve(line, args, environ) == -1)
             {
                 perror(line);
                 exit(EXIT_FAILURE);
@@ -56,7 +54,6 @@ int main(void)
         }
         else
         {
-            /* Parent waits for child */
             waitpid(pid, &status, 0);
         }
     }
