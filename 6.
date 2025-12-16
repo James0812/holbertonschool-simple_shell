@@ -24,7 +24,6 @@ if (strcmp(line, "exit") == 0)
 break;
 if (strcmp(line, "env") == 0)
 {
-extern char **environ;
 int i = 0;
 while (environ[i] != NULL)
 {
@@ -49,4 +48,6 @@ else
 {
 perror("fork failed");
 }
+}
 free(line);
+}
