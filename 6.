@@ -13,9 +13,9 @@ if (strcmp(line, "env") == 0)
 {
 extern char **environ;
 int i = 0;
-while (envrion[i] != NULL)
+while (environ[i] != NULL)
 {
-prinf("%s\n", environ[i]);
+printf("%s\n", environ[i]);
 i++;
 }
 continue;
