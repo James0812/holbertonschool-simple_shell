@@ -19,7 +19,7 @@ if (nread == -1)
 break;
 if (line[nread - 1] == '\n')
 line [nread -1] = '\0';
-}
+
 if (strcmp(line, "exit") == 0)
 break;
 if (strcmp(line, "env") == 0)
