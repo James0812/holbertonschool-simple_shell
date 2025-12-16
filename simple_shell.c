@@ -7,10 +7,28 @@
 extern char **environ;
 
 /**
- * find_in_path - finds a command in PATH
+ * get_path_from_env - get PATH value from environ
+ *
+ * Return: PATH string or NULL
+ */
+char *get_path_from_env(void)
+{
+	int i = 0;
+
+	while (environ[i])
+	{
+		if (strncmp(environ[i], "PATH=", 5) == 0)
+			return (environ[i] + 5);
+		i++;
+	}
+	return (NULL);
+}
+
+/**
+ * find_in_path - find command in PATH directories
  * @command: command name
  *
- * Return: full path if found, NULL otherwise
+ * Return: full path to command or NULL
  */
 char *find_in_path(char *command)
 {
@@ -20,7 +38,7 @@ char *find_in_path(char *command)
 	if (command == NULL)
 		return (NULL);
 
-	/* If command contains '/' */
+	/* If command already contains a path */
 	if (strchr(command, '/') != NULL)
 	{
 		if (access(command, X_OK) == 0)
@@ -28,7 +46,7 @@ char *find_in_path(char *command)
 		return (NULL);
 	}
 
-	path = getenv("PATH");
+	path = get_path_from_env();
 	if (path == NULL)
 		return (NULL);
 
@@ -37,7 +55,7 @@ char *find_in_path(char *command)
 		return (NULL);
 
 	dir = strtok(path_copy, ":");
-	while (dir != NULL)
+	while (dir)
 	{
 		snprintf(full_path, sizeof(full_path), "%s/%s", dir, command);
 		if (access(full_path, X_OK) == 0)
@@ -59,18 +77,16 @@ char *find_in_path(char *command)
  */
 int main(void)
 {
-	char *line = NULL;
+	char *line = NULL, *cmd_path;
 	size_t len = 0;
 	ssize_t nread;
 	pid_t pid;
 	int status;
-	char *cmd_path;
+	char *tokens[100];
+	int i, only_spaces;
 
 	while (1)
 	{
-		char *tokens[100];
-		int i, all_spaces;
-
 		if (isatty(STDIN_FILENO))
 			printf("($) "), fflush(stdout);
 
@@ -80,35 +96,34 @@ int main(void)
 			if (isatty(STDIN_FILENO))
 				printf("\n");
 			free(line);
-			return (0);
+			exit(EXIT_SUCCESS);
 		}
 
 		if (line[nread - 1] == '\n')
 			line[nread - 1] = '\0';
 
 		/* Check for empty or spaces-only input */
-		all_spaces = 1;
-		for (i = 0; line[i] != '\0'; i++)
+		only_spaces = 1;
+		for (i = 0; line[i]; i++)
 		{
 			if (line[i] != ' ' && line[i] != '\t')
 			{
-				all_spaces = 0;
+				only_spaces = 0;
 				break;
 			}
 		}
-		if (all_spaces)
+		if (only_spaces)
 			continue;
 
 		/* Tokenize input */
 		i = 0;
 		tokens[i] = strtok(line, " \t");
-		while (tokens[i] != NULL && i < 99)
+		while (tokens[i] && i < 99)
 		{
 			i++;
 			tokens[i] = strtok(NULL, " \t");
 		}
 
-		/* Handle PATH (NO fork if command not found) */
 		cmd_path = find_in_path(tokens[0]);
 		if (cmd_path == NULL)
 		{
@@ -116,6 +131,7 @@ int main(void)
 			continue;
 		}
 
+		/* Fork only if command exists */
 		pid = fork();
 		if (pid == -1)
 		{
