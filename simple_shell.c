@@ -7,47 +7,40 @@
 extern char **environ;
 
 /**
- * get_path_from_env - get PATH value from environ
- *
- * Return: PATH string or NULL
+ * get_path_value - Get PATH value from environ
+ * Return: pointer to PATH value or NULL
  */
-char *get_path_from_env(void)
+char *get_path_value(void)
 {
-	int i = 0;
+	int i;
 
-	while (environ[i])
+	for (i = 0; environ[i] != NULL; i++)
 	{
 		if (strncmp(environ[i], "PATH=", 5) == 0)
 			return (environ[i] + 5);
-		i++;
 	}
 	return (NULL);
 }
 
 /**
- * find_in_path - find command in PATH directories
- * @command: command name
- *
- * Return: full path to command or NULL
+ * find_command - Find command in PATH
+ * @cmd: command name
+ * Return: full path or NULL
  */
-char *find_in_path(char *command)
+char *find_command(char *cmd)
 {
 	char *path, *path_copy, *dir;
-	static char full_path[1024];
+	char full_path[1024];
 
-	if (command == NULL)
-		return (NULL);
-
-	/* If command already contains a path */
-	if (strchr(command, '/') != NULL)
+	if (cmd[0] == '/' || cmd[0] == '.')
 	{
-		if (access(command, X_OK) == 0)
-			return (command);
+		if (access(cmd, X_OK) == 0)
+			return (strdup(cmd));
 		return (NULL);
 	}
 
-	path = get_path_from_env();
-	if (path == NULL)
+	path = get_path_value();
+	if (path == NULL || *path == '\0')
 		return (NULL);
 
 	path_copy = strdup(path);
@@ -55,13 +48,13 @@ char *find_in_path(char *command)
 		return (NULL);
 
 	dir = strtok(path_copy, ":");
-	while (dir)
+	while (dir != NULL)
 	{
-		snprintf(full_path, sizeof(full_path), "%s/%s", dir, command);
+		snprintf(full_path, sizeof(full_path), "%s/%s", dir, cmd);
 		if (access(full_path, X_OK) == 0)
 		{
 			free(path_copy);
-			return (full_path);
+			return (strdup(full_path));
 		}
 		dir = strtok(NULL, ":");
 	}
@@ -72,18 +65,15 @@ char *find_in_path(char *command)
 
 /**
  * main - Simple UNIX command interpreter
- *
- * Return: 0 on success
+ * Return: status
  */
 int main(void)
 {
-	char *line = NULL, *cmd_path;
+	char *line = NULL, *tokens[100], *cmd_path;
 	size_t len = 0;
 	ssize_t nread;
 	pid_t pid;
-	int status;
-	char *tokens[100];
-	int i, only_spaces;
+	int status = 0, i;
 
 	while (1)
 	{
@@ -93,67 +83,50 @@ int main(void)
 		nread = getline(&line, &len, stdin);
 		if (nread == -1)
 		{
-			if (isatty(STDIN_FILENO))
-				printf("\n");
 			free(line);
-			exit(EXIT_SUCCESS);
+			exit(status);
 		}
 
 		if (line[nread - 1] == '\n')
 			line[nread - 1] = '\0';
 
-		/* Check for empty or spaces-only input */
-		only_spaces = 1;
-		for (i = 0; line[i]; i++)
-		{
-			if (line[i] != ' ' && line[i] != '\t')
-			{
-				only_spaces = 0;
-				break;
-			}
-		}
-		if (only_spaces)
+		/* Skip empty or space-only lines */
+		for (i = 0; line[i] == ' ' || line[i] == '\t'; i++)
+			;
+		if (line[i] == '\0')
 			continue;
 
 		/* Tokenize input */
 		i = 0;
 		tokens[i] = strtok(line, " \t");
-		while (tokens[i] && i < 99)
+		while (tokens[i] != NULL && i < 99)
 		{
 			i++;
 			tokens[i] = strtok(NULL, " \t");
 		}
 
-		cmd_path = find_in_path(tokens[0]);
+		cmd_path = find_command(tokens[0]);
 		if (cmd_path == NULL)
 		{
-			fprintf(stderr, "command not found\n");
+			fprintf(stderr, "./hsh: 1: %s: not found\n", tokens[0]);
+			status = 127;
 			continue;
 		}
 
-		/* Fork only if command exists */
 		pid = fork();
-		if (pid == -1)
+		if (pid == 0)
 		{
-			perror("fork");
-			free(line);
-			exit(EXIT_FAILURE);
-		}
-		else if (pid == 0)
-		{
-			if (execve(cmd_path, tokens, environ) == -1)
-			{
-				perror(tokens[0]);
-				exit(EXIT_FAILURE);
-			}
+			execve(cmd_path, tokens, environ);
+			exit(1);
 		}
 		else
 		{
 			waitpid(pid, &status, 0);
+			free(cmd_path);
 		}
 	}
 
 	free(line);
-	return (0);
+	return (status);
 }
 
