@@ -1,0 +1,39 @@
+while (1)
+{
+write(STDOUT_FILENO, "$ ", 2);
+nread = getline(&line, &len, stdin);
+if (nread == -1)
+break;
+if (line[nread - 1] == '\n')
+line [nread -1] = '\0';
+}
+if (strcmp(line, "exit") == 0)
+break;
+if (strcmp(line, "env") == 0)
+{
+extern char **environ;
+int i = 0;
+while (envrion[i] != NULL)
+{
+prinf("%s\n", environ[i]);
+i++;
+}
+continue;
+}
+pid_t pid = fork();
+if (pid == 0)
+{
+char *args[] = {line, NULL};
+execve(line, args, environ);
+perror("execve failed");
+exit(EXIT_FAILURE);
+}
+else if (pid > 0)
+{
+wait(NULL);
+}
+else
+{
+perror("fork failed");
+}
+free(line);
