@@ -105,6 +105,13 @@ int main(void)
 			tokens[i] = strtok(NULL, " \t");
 		}
 
+		/* Built-in: exit */
+		if (strcmp(tokens[0], "exit") == 0)
+		{
+			free(line);
+			exit(status);
+		}
+
 		cmd_path = find_command(tokens[0]);
 		if (cmd_path == NULL)
 		{
