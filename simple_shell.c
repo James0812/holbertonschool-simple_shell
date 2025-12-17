@@ -4,6 +4,8 @@
 #include <string.h>
 #include <sys/wait.h>
 
+extern char **environ;
+
 #define MAX_TOKENS 64
 #define MAX_PATH 1024
 
@@ -92,7 +94,7 @@ int main(void)
 		}
 		args[i] = NULL;
 
-		/* Empty input or spaces only */
+		/* Empty input */
 		if (args[0] == NULL)
 			continue;
 
