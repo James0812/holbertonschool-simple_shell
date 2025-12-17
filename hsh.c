@@ -1,0 +1,56 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/wait.h>
+
+extern char **environ;
+int main(void);
+
+while (1);
+{
+char *line = NULL;
+size_t len = 0;
+ssize_t nread;
+pid_t pid;
+
+if (isatty(STDIN_FILENO))
+write(STDOUT_FILENO, "$ ", 2);
+nread = getline(&line, &len, stdin);
+if (nread == -1)
+break;
+if (line[nread - 1] == '\n')
+line [nread -1] = '\0';
+if (line[0] == '\0')
+continue;
+if (strcmp(line, "exit") == 0)
+break;
+if (strcmp(line, "env") == 0)
+{
+int i = 0;
+while (environ[i] != NULL)
+{
+printf("%s\n", environ[i]);
+i++;
+}
+continue;
+}
+pid_t pid = fork();
+if (pid == 0)
+{
+char *args[] = {line, NULL};
+execve(line, args, environ);
+perror("execve failed");
+exit(EXIT_FAILURE);
+}
+else if (pid > 0)
+{
+wait(NULL);
+}
+else
+{
+perror("fork failed");
+}
+}
+free(line)
+
