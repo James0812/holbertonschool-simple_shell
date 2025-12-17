@@ -36,6 +36,7 @@ i++;
 }
 continue;
 }
+pid = fork();
 if (pid == 0)
 {
 char *args[2]; 
