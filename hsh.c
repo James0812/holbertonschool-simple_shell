@@ -7,13 +7,14 @@
 extern char **environ;
 int main(void)
 
-while (1)
 {
 char *line = NULL;
 size_t len = 0;
 ssize_t nread;
 pid_t pid;
 
+while (1)
+{
 if (isatty(STDIN_FILENO))
 write(STDOUT_FILENO, "$ ", 2);
 nread = getline(&line, &len, stdin);
@@ -45,14 +46,12 @@ perror("execve failed");
 exit(EXIT_FAILURE);
 }
 else if (pid > 0)
-{
+
 wait(NULL);
-}
 else
-{
 perror("fork failed");
 
-free(line)
+free(line);
 }
 return (0);
 }
