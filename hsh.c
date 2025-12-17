@@ -5,9 +5,9 @@
 #include <sys/wait.h>
 
 extern char **environ;
-int main(void);
+int main(void)
 
-while (1);
+while (1)
 {
 char *line = NULL;
 size_t len = 0;
@@ -35,10 +35,11 @@ i++;
 }
 continue;
 }
-pid_t pid = fork();
 if (pid == 0)
 {
-char *args[] = {line, NULL};
+char *args[2]; 
+args[0] = line; 
+args[1] = NULL;
 execve(line, args, environ);
 perror("execve failed");
 exit(EXIT_FAILURE);
@@ -50,7 +51,9 @@ wait(NULL);
 else
 {
 perror("fork failed");
-}
-}
+
 free(line)
+}
+return (0);
+}
 
