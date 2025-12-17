@@ -128,8 +128,13 @@ int main(void)
         cmd_path = find_command(args[0]);
         if (cmd_path == NULL)
         {
-            dprintf(STDERR_FILENO, "./hsh: %d: %s: not found\n",
-                    line_count, args[0]);
+            char msg[128];
+            int len_msg;
+
+            len_msg = snprintf(msg, sizeof(msg),
+                               "./hsh: %d: %s: not found\n",
+                               line_count, args[0]);
+            write(STDERR_FILENO, msg, len_msg);
             exit_status = 127;  /* code de sortie correct */
             continue;
         }
