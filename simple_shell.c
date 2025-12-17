@@ -69,15 +69,20 @@ int main(void)
 	int status;
 	char *cmd_path;
 	int i;
+	int interactive;
+
+	interactive = isatty(STDIN_FILENO);
 
 	while (1)
 	{
-		write(STDOUT_FILENO, "$ ", 2);
+		if (interactive)
+			write(STDOUT_FILENO, "$ ", 2);
 
 		read = getline(&line, &len, stdin);
 		if (read == -1)
 		{
-			write(STDOUT_FILENO, "\n", 1);
+			if (interactive)
+				write(STDOUT_FILENO, "\n", 1);
 			break;
 		}
 
