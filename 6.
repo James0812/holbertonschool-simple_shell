@@ -51,3 +51,5 @@ perror("fork failed");
 }
 }
 free(line);
+return (0);
+}
