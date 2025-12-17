@@ -1,8 +1,8 @@
-
  File: `man_1_simple_shell`
 
 ```man
-.TH HSH 18 "December 2025" "Holberton School" "Simple Shell Manual"
+.TH HSH 1 "December 2025" "Holberton School" "Simple Shell Manual"
+
 .SH NAME
 hsh \- simple UNIX command interpreter
 
@@ -30,5 +30,11 @@ Exit the shell.
 .SH ENVIRONMENT
 The shell uses the PATH environment variable to locate executable files.
 
+.SH EXIT STATUS
+hsh exits with status 0 on success, and non-zero on error.
+
+.SH SEE ALSO
+sh(1), bash(1)
+
 .SH AUTHOR
-James and Maxime by Holberton School students.
+James Roussel and Maxime Régnier, Holberton School students.
