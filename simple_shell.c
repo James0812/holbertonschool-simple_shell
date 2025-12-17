@@ -17,14 +17,27 @@ char *find_command_in_path(char *cmd)
     char *path_env, *path_copy, *dir, *full_path;
     struct stat st;
 
-    if (strchr(cmd, '/')) /* Command contains /, use directly */
+    if (strchr(cmd, '/'))
     {
         if (stat(cmd, &st) == 0)
             return strdup(cmd);
         return NULL;
     }
 
-    path_env = getenv("PATH");
+    path_env = NULL;
+    {
+        int i = 0;
+        while (environ[i])
+        {
+            if (strncmp(environ[i], "PATH=", 5) == 0)
+            {
+                path_env = environ[i] + 5;
+                break;
+            }
+            i++;
+        }
+    }
+
     if (!path_env || path_env[0] == '\0')
         return NULL;
 
@@ -41,12 +54,14 @@ char *find_command_in_path(char *cmd)
             free(path_copy);
             return NULL;
         }
+
         sprintf(full_path, "%s/%s", dir, cmd);
         if (stat(full_path, &st) == 0)
         {
             free(path_copy);
             return full_path;
         }
+
         free(full_path);
         dir = strtok(NULL, ":");
     }
@@ -56,7 +71,7 @@ char *find_command_in_path(char *cmd)
 }
 
 /**
- * main - Simple UNIX command interpreter (0.3)
+ * main - Simple UNIX command interpreter (0.4)
  * Return: 0 on success
  */
 int main(void)
@@ -75,15 +90,14 @@ int main(void)
 
         if (isatty(STDIN_FILENO))
         {
-            printf("($) ");
-            fflush(stdout);
+            write(STDOUT_FILENO, "($) ", 4);
         }
 
         nread = getline(&line, &len, stdin);
-        if (nread == -1) /* Ctrl+D */
+        if (nread == -1)
         {
             if (isatty(STDIN_FILENO))
-                printf("\n");
+                write(STDOUT_FILENO, "\n", 1);
             free(line);
             exit(status);
         }
@@ -91,18 +105,18 @@ int main(void)
         if (line[nread - 1] == '\n')
             line[nread - 1] = '\0';
 
-        /* Skip empty or spaces-only lines */
+        /* Skip empty lines */
         {
-            int all_spaces = 1;
+            int only_spaces = 1;
             for (i = 0; line[i]; i++)
             {
                 if (line[i] != ' ' && line[i] != '\t')
                 {
-                    all_spaces = 0;
+                    only_spaces = 0;
                     break;
                 }
             }
-            if (all_spaces)
+            if (only_spaces)
                 continue;
         }
 
@@ -114,42 +128,55 @@ int main(void)
             i++;
             tokens[i] = strtok(NULL, " \t");
         }
-        if (tokens[0] == NULL)
+
+        if (!tokens[0])
             continue;
 
-        /* Built-in exit */
+        /* Built-in: exit */
         if (strcmp(tokens[0], "exit") == 0)
         {
             free(line);
             exit(status);
         }
 
-        /* Find command in PATH */
+        /* Built-in: env */
+        if (strcmp(tokens[0], "env") == 0)
+        {
+            i = 0;
+            while (environ[i])
+            {
+                write(STDOUT_FILENO, environ[i], strlen(environ[i]));
+                write(STDOUT_FILENO, "\n", 1);
+                i++;
+            }
+            status = 0;
+            continue;
+        }
+
+        /* PATH resolution */
         cmd_path = find_command_in_path(tokens[0]);
         if (!cmd_path)
         {
-            fprintf(stderr, "%s: not found\n", tokens[0]);
+            write(STDERR_FILENO, tokens[0], strlen(tokens[0]));
+            write(STDERR_FILENO, ": not found\n", 12);
             status = 127;
             continue;
         }
 
-        /* Fork and execute */
         pid = fork();
         if (pid == -1)
         {
             perror("fork");
-            free(line);
             free(cmd_path);
+            free(line);
             exit(EXIT_FAILURE);
         }
         else if (pid == 0)
         {
-            if (execve(cmd_path, tokens, environ) == -1)
-            {
-                perror(cmd_path);
-                free(cmd_path);
-                exit(EXIT_FAILURE);
-            }
+            execve(cmd_path, tokens, environ);
+            perror(cmd_path);
+            free(cmd_path);
+            exit(EXIT_FAILURE);
         }
         else
         {
@@ -162,6 +189,6 @@ int main(void)
     }
 
     free(line);
-    return 0;
+    return (0);
 }
 
