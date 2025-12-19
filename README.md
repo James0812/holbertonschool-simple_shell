@@ -33,10 +33,14 @@ gcc -Wall -Werror -Wextra -pedantic -std=gnu89 *.c -o hsh
 - Displays a prompt `($)`
 - Reads a command line from standard input
 - Executes simple commands without arguments
+
 ### :small_blue_diamond: Simple Shell 0.1 - Handle command lines with arguments
 - Supports commands with arguments
-Example:
+- Example :
+```bash
 ls -l /tmp
+```
+
 ### 🔹 Simple Shell 0.2 - Handle the PATH
 - Searches for commands in directories listed in the PATH variable
 - fork() is not called if the command does not exist
