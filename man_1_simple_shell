@@ -3,7 +3,9 @@
 
 ```man
 .TH HSH 18 "December 2025" "Holberton School" "Simple Shell Manual"
+
 .SH NAME
+
 hsh \- simple UNIX command interpreter
 
 .SH SYNOPSIS
