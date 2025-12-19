@@ -8,6 +8,23 @@
 extern char **environ;
 
 /**
+ * print_error - print error message
+ * @shell: shell name
+ * @line: line number
+ * @cmd: command
+ */
+void print_error(char *shell, unsigned int line, char *cmd)
+{
+	char buffer[256];
+	int len = 0;
+
+	len += snprintf(buffer + len, sizeof(buffer) - len,
+	                "%s: %u: %s: not found\n",
+	                shell, line, cmd);
+	write(STDERR_FILENO, buffer, len);
+}
+
+/**
  * find_in_path - find command in PATH
  * @cmd: command name
  *
@@ -15,7 +32,7 @@ extern char **environ;
  */
 char *find_in_path(char *cmd)
 {
-	char *path, *path_copy, *dir;
+	char *path = NULL, *path_copy, *dir;
 	static char full_path[1024];
 	struct stat st;
 	int i;
@@ -28,7 +45,8 @@ char *find_in_path(char *cmd)
 			break;
 		}
 	}
-	if (!environ[i] || !path || path[0] == '\0')
+
+	if (!path || path[0] == '\0')
 		return (NULL);
 
 	path_copy = strdup(path);
@@ -46,6 +64,7 @@ char *find_in_path(char *cmd)
 		}
 		dir = strtok(NULL, ":");
 	}
+
 	free(path_copy);
 	return (NULL);
 }
@@ -53,7 +72,7 @@ char *find_in_path(char *cmd)
 /**
  * main - Simple UNIX command interpreter
  *
- * Return: 0 on success
+ * Return: 0
  */
 int main(int argc, char **argv)
 {
@@ -104,12 +123,13 @@ int main(int argc, char **argv)
 		if (strcmp(tokens[0], "env") == 0)
 		{
 			for (i = 0; environ[i]; i++)
-				printf("%s\n", environ[i]);
+				write(STDOUT_FILENO, environ[i],
+				      strlen(environ[i])), write(1, "\n", 1);
 			last_status = 0;
 			continue;
 		}
 
-		/* absolute or relative path */
+		/* absolute / relative path */
 		if (tokens[0][0] == '/' || tokens[0][0] == '.')
 			cmd_path = tokens[0];
 		else
@@ -118,8 +138,7 @@ int main(int argc, char **argv)
 		/* command not found → NO fork */
 		if (!cmd_path)
 		{
-			dprintf(STDERR_FILENO, "%s: %u: %s: not found\n",
-				argv[0], line_number, tokens[0]);
+			print_error(argv[0], line_number, tokens[0]);
 			last_status = 127;
 			continue;
 		}
@@ -134,10 +153,7 @@ int main(int argc, char **argv)
 		else if (pid == 0)
 		{
 			if (execve(cmd_path, tokens, environ) == -1)
-			{
-				perror(argv[0]);
 				exit(2);
-			}
 		}
 		else
 		{
