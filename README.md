@@ -30,12 +30,11 @@ gcc -Wall -Werror -Wextra -pedantic -std=gnu89 *.c -o hsh
 ## ✅ Implemented Features
 
 ### 🔹 Simple Shell 0.0
-- Displays a prompt ($)` 
-Reads a command line from standard input
-Executes simple commands without arguments
-
-🔹 Simple Shell 0.1 - Handle command lines with arguments
-Supports commands with arguments
+- Displays a prompt `($)`
+- Reads a command line from standard input
+- Executes simple commands without arguments
+### :small_blue_diamond: Simple Shell 0.1 - Handle command lines with arguments
+- Supports commands with arguments
 Example:
 ls -l /tmp
 ### 🔹 Simple Shell 0.2 - Handle the PATH
