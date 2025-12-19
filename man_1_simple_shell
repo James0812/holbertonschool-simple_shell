@@ -1,7 +1,4 @@
 
- File: man_1_simple_shell
-
-```man
 .TH HSH 18 "December 2025" "Holberton School" "Simple Shell Manual"
 
 .SH NAME
