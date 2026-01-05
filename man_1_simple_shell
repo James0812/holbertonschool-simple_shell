@@ -87,5 +87,4 @@ No memory leaks (checked with Valgrind)
 sh(1), bash(1)
 
 .SH AUTHOR
-James Roussel and Maxime Régnier, Holberton School students.
- 
+Maxime RÉGNIER and James ROUSSEL, Holberton School students.
