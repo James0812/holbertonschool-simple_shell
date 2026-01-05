@@ -29,7 +29,7 @@ gcc -Wall -Werror -Wextra -pedantic -std=gnu89 *.c -o hsh
 
 ## ✅ Implemented Features
 
-### 🔹 Simple Shell 0.0
+### :small_blue_diamond: Simple Shell 0.0
 - Displays a prompt `($)`
 - Reads a command line from standard input
 - Executes simple commands without arguments
@@ -41,24 +41,24 @@ gcc -Wall -Werror -Wextra -pedantic -std=gnu89 *.c -o hsh
 ls -l /tmp
 ```
 
-### 🔹 Simple Shell 0.2 - Handle the PATH
+### :small_blue_diamond: Simple Shell 0.2 - Handle the PATH
 - Searches for commands in directories listed in the PATH variable
 - `fork()` is not called if the command does not exist
 - Correct handling of an empty PATH
 UNIX-compliant error message:
 ```bash
-/hsh: 1: ls: not found
+./hsh: 1: ls: not found
 ```
 Exit status :
 - `127` → command not found
 
-### 🔹 Simple Shell 0.3 - Built-in exit
+### :small_blue_diamond: Simple Shell 0.3 - Built-in exit
 - Implements the built-in command
 `exit`
 - Exits the shell using the last command's exit status
 - No argument handling required
 
-### 🔹 Simple Shell 0.4 - Built-in env
+### :small_blue_diamond: Simple Shell 0.4 - Built-in env
 - Prints the current environment variables:
 `env`
 
@@ -95,7 +95,7 @@ Interactive mode:
 ### ❌ No dprintf()
 ### ❌ No printf() for error messages
 ### ✅ Only allowed system calls and functions
-### ✅ Compatible with ISO C90
+### ✅ Compatible with GNU89
 ### ✅ Betty style compliant
 ### ✅ No memory leaks (checked with Valgrind)
 
