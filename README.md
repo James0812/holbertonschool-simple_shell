@@ -47,7 +47,7 @@ ls -l /tmp
 - Correct handling of an empty PATH
 UNIX-compliant error message:
 ```bash
-/hsh: 1: ls: not found
+./hsh: 1: ls: not found
 ```
 Exit status :
 - `127` → command not found
