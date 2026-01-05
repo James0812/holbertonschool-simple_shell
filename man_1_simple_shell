@@ -27,17 +27,17 @@ echo "/bin/ls" | ./hsh
 
 .SH FEATURES
 .IP \[bu] 2
-Displays a prompt ($) in interactive mode
+  Displays a prompt ($) in interactive mode
 .IP \[bu]
-Executes commands with arguments
+  Executes commands with arguments
 .IP \[bu]
-Searches commands using the PATH environment variable
+  Searches commands using the PATH environment variable
 .IP \[bu]
-Does not call fork() when a command is not found
+  Does not call fork() when a command is not found
 .IP \[bu]
-Handles empty or missing PATH and empty environments
+  Handles empty or missing PATH and empty environments
 .IP \[bu]
-Implements built-in commands: exit and env
+  Implements built-in commands: exit and env
 
 .SH BUILTINS
 .TP
@@ -63,7 +63,7 @@ Other values correspond to child process exit status
 .SH ERRORS
 When a command is not found, hsh prints a UNIX-compliant error message:
 .IP
-./hsh: 1: command: not found
+./hsh: 1: ls: not found
 
 .SH CONSTRAINTS
 .IP \[bu] 2
