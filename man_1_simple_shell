@@ -1,17 +1,20 @@
 
- File: `man_1_simple_shell`
+.TH HSH 1 "December 2025" "Holberton School" "Simple Shell Manual"
 
-```man
-.TH HSH 18 "December 2025" "Holberton School" "Simple Shell Manual"
 .SH NAME
+
 hsh \- simple UNIX command interpreter
 
 .SH SYNOPSIS
 .B hsh
 
 .SH DESCRIPTION
-hsh is a simple UNIX command interpreter written in C.
-It executes commands entered by the user or read from standard input.
+hsh is a minimal UNIX command interpreter written in C.
+It behaves similarly to /bin/sh and supports both interactive
+and non-interactive modes.
+
+The shell reads commands from standard input, parses them,
+and executes them using fork and execve.
 
 .SH USAGE
 Interactive mode:
@@ -22,13 +25,66 @@ Non-interactive mode:
 .IP
 echo "/bin/ls" | ./hsh
 
+.SH FEATURES
+.IP \[bu] 2
+  Displays a prompt ($) in interactive mode
+.IP \[bu]
+  Executes commands with arguments
+.IP \[bu]
+  Searches commands using the PATH environment variable
+.IP \[bu]
+  Does not call fork() when a command is not found
+.IP \[bu]
+  Handles empty or missing PATH and empty environments
+.IP \[bu]
+  Implements built-in commands: exit and env
+
 .SH BUILTINS
 .TP
 .B exit
-Exit the shell.
+Exit the shell using the last command's exit status.
+
+.TP
+.B env
+Print the current environment variables.
 
 .SH ENVIRONMENT
 The shell uses the PATH environment variable to locate executable files.
+Environment variables are accessed without using getenv().
+
+.SH EXIT STATUS
+.IP \[bu] 2
+0 on success
+.IP \[bu]
+127 if the command is not found
+.IP \[bu]
+Other values correspond to child process exit status
+
+.SH ERRORS
+When a command is not found, hsh prints a UNIX-compliant error message:
+.IP
+./hsh: 1: ls: not found
+
+.SH CONSTRAINTS
+.IP \[bu] 2
+No forbidden functions used
+.IP \[bu]
+No system()
+.IP \[bu]
+No getenv()
+.IP \[bu]
+No dprintf()
+.IP \[bu]
+No printf() for error messages
+.IP \[bu]
+ISO C90 compliant
+.IP \[bu]
+Betty style compliant
+.IP \[bu]
+No memory leaks (checked with Valgrind)
+
+.SH SEE ALSO
+sh(1), bash(1)
 
 .SH AUTHOR
-James and Maxime by Holberton School students.
+Maxime RÉGNIER and James ROUSSEL, Holberton School students.
