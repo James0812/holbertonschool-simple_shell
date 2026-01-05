@@ -95,7 +95,7 @@ Interactive mode:
 ### ❌ No dprintf()
 ### ❌ No printf() for error messages
 ### ✅ Only allowed system calls and functions
-### ✅ Compatible with ISO C90
+### ✅ Compatible with GNU89
 ### ✅ Betty style compliant
 ### ✅ No memory leaks (checked with Valgrind)
 
